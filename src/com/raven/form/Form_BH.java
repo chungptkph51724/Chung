@@ -4,6 +4,17 @@
  */
 package com.raven.form;
 
+import com.raven.model.Model_HDCT;
+import com.raven.model.Model_HoaDon;
+import com.raven.model.Model_SPChiTiet;
+import com.raven.model.Model_SanPham;
+import com.raven.repository.Repository_HDCT;
+import com.raven.repository.Repository_HoaDon;
+import com.raven.repository.Repository_SPChiTiet;
+import com.raven.repository.Repository_Vourcher;
+import com.raven.repository.reponsitory_SanPham;
+import com.raven.repository.repository_KhachHang;
+import com.raven.them.Form_ThongTinKH;
 import java.awt.Point;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
@@ -19,13 +30,72 @@ import javax.swing.table.DefaultTableModel;
  * @author admin
  */
 public class Form_BH extends javax.swing.JPanel {
+int count_hoaDonCho = 0;
+    DefaultTableModel model;
+    DefaultTableModel model_SPChitiet;
+    DefaultTableModel model_HoaDon;
+    DefaultTableModel model_GioHang;
+
+    private reponsitory_SanPham rp = new reponsitory_SanPham();
+    private Repository_SPChiTiet rp_spct=new Repository_SPChiTiet();
+    private Repository_HoaDon rpHD = new Repository_HoaDon();
+    private Repository_HDCT rpHDCT = new Repository_HDCT();
+    private repository_KhachHang rpKH = new repository_KhachHang();
+    private Repository_Vourcher rpVoucher = new Repository_Vourcher();
+    
 
     /**
      * Creates new form Form_SP
      */
-
     public Form_BH() {
         initComponents();
+        fillToTable1(rp_spct.getData());
+        fillHoaDOnCho(rpHD.getAllChoHoaDonTT());
+        CapNhatThoiGian();
+        Timer timer = new Timer(1000, e -> CapNhatThoiGian());
+        timer.start();
+    }
+    void CapNhatThoiGian() {
+
+        LocalDateTime now = LocalDateTime.now();
+        // Định dạng ngày
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String formattedDate = now.format(dateFormatter);
+
+        // Đặt ngày vào JLabel
+        lbl_Ngay.setText(formattedDate);
+
+        // Lấy giờ hiện tại
+        LocalTime now1 = LocalTime.now();
+        // Định dạng giờ
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String formattedTime = now1.format(timeFormatter);
+
+        // Đặt giờ vào JLabel
+        lbl_Gio.setText(formattedTime);
+
+    }
+    void fillCbo_Voucher_BH(ArrayList<String> ds) {
+        cbo_MaGiamGia.removeAllItems();
+        for (String d : ds) {
+            cbo_MaGiamGia.addItem(d);
+        }
+    }
+    void fillToTable1(ArrayList<Model_SPChiTiet> ds) {
+        model_SPChitiet = (DefaultTableModel) tbl_CTSP.getModel();
+        model_SPChitiet.setRowCount(0);
+        for (Model_SPChiTiet d : ds) {
+            model_SPChitiet.addRow((Object[]) d.toDataRow());
+        }
+    }
+    void fillHoaDOnCho(ArrayList<Model_HoaDon> ds) {
+
+        model_HoaDon = (DefaultTableModel) tbl_hoadoncho.getModel();
+        model_HoaDon.setRowCount(0);
+        for (Model_HoaDon d : ds) {
+            model_HoaDon.addRow(d.toDataHoaDonCho());
+        }
+
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -38,17 +108,17 @@ public class Form_BH extends javax.swing.JPanel {
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tbl_hoadon = new javax.swing.JTable();
+        tbl_hoadoncho = new javax.swing.JTable();
         btn_HoaDon = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         btn_XoaGioHang = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tbl_GioHang = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        tbl_DSSP = new javax.swing.JTable();
         btn_timkiemDSSP = new javax.swing.JButton();
         txt_timkiemDSSP = new javax.swing.JTextField();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tbl_CTSP = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -89,7 +159,7 @@ public class Form_BH extends javax.swing.JPanel {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Hóa đơn", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
-        tbl_hoadon.setModel(new javax.swing.table.DefaultTableModel(
+        tbl_hoadoncho.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
                 {null, null, null, null, null},
@@ -100,12 +170,12 @@ public class Form_BH extends javax.swing.JPanel {
                 "STT", "Mã HD", "Ngày thanh toán", "Mã NV", "Tình trạng"
             }
         ));
-        tbl_hoadon.addMouseListener(new java.awt.event.MouseAdapter() {
+        tbl_hoadoncho.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tbl_hoadonMouseClicked(evt);
+                tbl_hoadonchoMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(tbl_hoadon);
+        jScrollPane1.setViewportView(tbl_hoadoncho);
 
         btn_HoaDon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/icons8-add-30.png"))); // NOI18N
         btn_HoaDon.setText("Tạo hóa đơn");
@@ -153,13 +223,13 @@ public class Form_BH extends javax.swing.JPanel {
 
         tbl_GioHang.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "STT", "Mã SP", "Đơn giá", "Số lượng", "Imei", "Thành tiền"
+                "STT", "Mã SP", "Đơn giá", "Số lượng", "Thành tiền"
             }
         ));
         tbl_GioHang.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -193,24 +263,6 @@ public class Form_BH extends javax.swing.JPanel {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Danh sách sản phẩm", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
-        tbl_DSSP.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "Mã SP", "Số lượng tồn kho", "Giá", "CPU", "GPU", "Ram", "Màu sắc", "Dung lượng"
-            }
-        ));
-        tbl_DSSP.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tbl_DSSPMouseClicked(evt);
-            }
-        });
-        jScrollPane3.setViewportView(tbl_DSSP);
-
         btn_timkiemDSSP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         btn_timkiemDSSP.setText("Tìm kiếm");
         btn_timkiemDSSP.addActionListener(new java.awt.event.ActionListener() {
@@ -219,19 +271,36 @@ public class Form_BH extends javax.swing.JPanel {
             }
         });
 
+        tbl_CTSP.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Ma san pham", "Ten san pham", "So luong ton", "Mau sac", "Kich thuoc", "Loai san pham", "Gia ban", "Trang thai"
+            }
+        ));
+        tbl_CTSP.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbl_CTSPMouseClicked(evt);
+            }
+        });
+        jScrollPane4.setViewportView(tbl_CTSP);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(btn_timkiemDSSP)
-                        .addGap(45, 45, 45)
-                        .addComponent(txt_timkiemDSSP, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addComponent(btn_timkiemDSSP)
+                .addGap(45, 45, 45)
+                .addComponent(txt_timkiemDSSP, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(255, Short.MAX_VALUE))
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addComponent(jScrollPane4)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -241,9 +310,9 @@ public class Form_BH extends javax.swing.JPanel {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_timkiemDSSP)
                     .addComponent(txt_timkiemDSSP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(19, 19, 19))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Đơn hàng", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
@@ -569,39 +638,85 @@ public class Form_BH extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+
     private void btn_HoaDonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_HoaDonActionPerformed
         // TODO add your handling code here:
-
+        
+     
     }//GEN-LAST:event_btn_HoaDonActionPerformed
 
     private void btn_timkiemDSSPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_timkiemDSSPActionPerformed
         // TODO add your handling code here:
+
     }//GEN-LAST:event_btn_timkiemDSSPActionPerformed
 
-    private void tbl_DSSPMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_DSSPMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_tbl_DSSPMouseClicked
+    private void tbl_hoadonchoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_hoadonchoMouseClicked
 
-    private void tbl_hoadonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_hoadonMouseClicked
-
-    }//GEN-LAST:event_tbl_hoadonMouseClicked
+    }//GEN-LAST:event_tbl_hoadonchoMouseClicked
 
     private void tbl_GioHangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_GioHangMouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_tbl_GioHangMouseClicked
-
+String timKiemKH() {
+        String sdt = txt_SDT_KH.getText();
+        if (sdt.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Vui lòng nhập số điện thoại!");
+            return null;
+        }
+        return sdt;
+    }
     private void btn_TimKiem_SDTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_TimKiem_SDTActionPerformed
+if (timKiemKH() != null) {
+            if (!lbl_MaKH.getText().isEmpty()) {
+                int i = JOptionPane.showConfirmDialog(null, "Bạn có muốn thay đổi thông tin không?", "Xác nhận", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (i == 1) {
+                    txt_SDT_KH.setText("");
+                    return;
+                }
+            }
 
+            // Gọi phương thức một lần và lưu kết quả
+            String[] thongTinKH = rpKH.capNhatThongTinKH(txt_SDT_KH.getText(), lbl_MaHD.getText());
+
+            if (thongTinKH != null) { // Kiểm tra nếu tìm thấy thông tin
+                lbl_MaKH.setText(thongTinKH[0]); // Gán mã khách hàng
+                lbl_TenKH.setText(thongTinKH[1]); // Gán tên khách hàng
+            } else {
+                JOptionPane.showMessageDialog(null, "Không tìm thấy thông tin khách hàng!");
+            }
+
+            // Xóa nội dung ô nhập
+            txt_SDT_KH.setText("");
+        }
 
     }//GEN-LAST:event_btn_TimKiem_SDTActionPerformed
 
     private void btn_ThemMoiKHMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btn_ThemMoiKHMouseClicked
         // TODO add your handling code here:
 
+
     }//GEN-LAST:event_btn_ThemMoiKHMouseClicked
 
     private void btn_ThemMoiKHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ThemMoiKHActionPerformed
+// Nếu mã khách hàng là null hoặc rỗng, hiển thị hộp thoại xác nhận
+        int result = JOptionPane.showConfirmDialog(
+                null,
+                "Bạn có muốn thêm mới khách hàng không?",
+                "Xác nhận",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (result == JOptionPane.YES_OPTION) {
+            // Lấy vị trí của nút bấm
+            Form_ThongTinKH ttKh = new Form_ThongTinKH();
+            Point btnLocation = btn_ThemMoiKH.getLocationOnScreen();
 
+            int offsetX = 280; // Điều chỉnh mức độ lệch sang trái (50 pixel)
+            ttKh.setLocation(btnLocation.x - offsetX, btnLocation.y + 50 + btn_ThemMoiKH.getHeight());
+
+            // Hiển thị form
+            ttKh.setVisible(true);
+        }
     }//GEN-LAST:event_btn_ThemMoiKHActionPerformed
 
     private void cbo_MaGiamGiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbo_MaGiamGiaActionPerformed
@@ -610,15 +725,24 @@ public class Form_BH extends javax.swing.JPanel {
 
     private void cbo_MaGiamGiaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cbo_MaGiamGiaMouseClicked
 
-    }//GEN-LAST:event_cbo_MaGiamGiaMouseClicked
 
+    }//GEN-LAST:event_cbo_MaGiamGiaMouseClicked
+    
     private void btn_ThanhToanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ThanhToanActionPerformed
         // TODO add your handling code here:
+
     }//GEN-LAST:event_btn_ThanhToanActionPerformed
 
     private void btn_XoaGioHangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_XoaGioHangActionPerformed
 
     }//GEN-LAST:event_btn_XoaGioHangActionPerformed
+
+    private void tbl_CTSPMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_CTSPMouseClicked
+        // TODO add your handling code here:
+        int i = tbl_CTSP.getSelectedRow();
+
+
+    }//GEN-LAST:event_tbl_CTSPMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -650,7 +774,7 @@ public class Form_BH extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel lbl_Gio;
     private javax.swing.JLabel lbl_MaHD;
     private javax.swing.JLabel lbl_MaKH;
@@ -664,9 +788,9 @@ public class Form_BH extends javax.swing.JPanel {
     private javax.swing.JLabel lbl_Voucher_giamgiaCaoNhat;
     private javax.swing.JLabel lbl_maNhanVien;
     private javax.swing.JLabel lbl_tienGiamGia;
-    private javax.swing.JTable tbl_DSSP;
+    private javax.swing.JTable tbl_CTSP;
     private javax.swing.JTable tbl_GioHang;
-    private javax.swing.JTable tbl_hoadon;
+    private javax.swing.JTable tbl_hoadoncho;
     private javax.swing.JTextField txt_NgayThanhToan;
     private javax.swing.JTextField txt_SDT_KH;
     private javax.swing.JTextField txt_timkiemDSSP;

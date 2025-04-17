@@ -1,17 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.raven.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-/**
- *
- * @author ADMIN
- */
-public class Voucher {
+public class Model_Vourcher {
     private int id;
     private String maVoucher;
     private String mota;
@@ -22,12 +14,20 @@ public class Voucher {
     private Date ngayKetThuc;
     private String dieuKienApDung;
     
-    private int is_deleted;
+    private boolean trangThai;
 
-    public Voucher() {
+    public Model_Vourcher() {
     }
 
-    public Voucher( String maVoucher, String mota, float giamGia, BigDecimal giamGiaToiDa, int hinhThucGiamGia, Date ngayBatDau, Date ngayKetThuc, String dieuKienApDung) {
+    public boolean isTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(boolean trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public Model_Vourcher(String maVoucher, String mota, float giamGia, BigDecimal giamGiaToiDa, int hinhThucGiamGia, Date ngayBatDau, Date ngayKetThuc, String dieuKienApDung) {
         this.maVoucher = maVoucher;
         this.mota = mota;
         this.giamGia = giamGia;
@@ -37,45 +37,49 @@ public class Voucher {
         this.ngayKetThuc = ngayKetThuc;
         this.dieuKienApDung = dieuKienApDung;
     }
-
-    public Voucher(int is_deleted) {
-        this.is_deleted = is_deleted;
-    }
-
-    public int getIs_deleted() {
-        return is_deleted;
-    }
-
-    public void setIs_deleted(int is_deleted) {
-        this.is_deleted = is_deleted;
-    }
-    
     
 
-    // Constructor cho việc cập nhật (có ID)
-
-    public Voucher(int id, String maVoucher, String mota, float giamGia, BigDecimal giamGiaToiDa,
-
-                   int hinhThucGiamGia, Date ngayBatDau, Date ngayKetThuc, String dieuKienApDung) {
-
+    public Model_Vourcher(int id, boolean trangThai) {
         this.id = id;
+        this.trangThai = trangThai;
+    }
 
+    public Model_Vourcher(int id, String maVoucher, String mota, float giamGia, BigDecimal giamGiaToiDa, int hinhThucGiamGia, Date ngayBatDau, Date ngayKetThuc, String dieuKienApDung, boolean trangThai) {
+        this.id = id;
         this.maVoucher = maVoucher;
-
         this.mota = mota;
-
         this.giamGia = giamGia;
-
         this.giamGiaToiDa = giamGiaToiDa;
-
         this.hinhThucGiamGia = hinhThucGiamGia;
-
         this.ngayBatDau = ngayBatDau;
-
         this.ngayKetThuc = ngayKetThuc;
-
         this.dieuKienApDung = dieuKienApDung;
+        this.trangThai = trangThai;
+    }
 
+    public Model_Vourcher(int id, String maVoucher, String mota, float giamGia, BigDecimal giamGiaToiDa, int hinhThucGiamGia, Date ngayBatDau, Date ngayKetThuc, String dieuKienApDung) {
+        this.id = id;
+        this.maVoucher = maVoucher;
+        this.mota = mota;
+        this.giamGia = giamGia;
+        this.giamGiaToiDa = giamGiaToiDa;
+        this.hinhThucGiamGia = hinhThucGiamGia;
+        this.ngayBatDau = ngayBatDau;
+        this.ngayKetThuc = ngayKetThuc;
+        this.dieuKienApDung = dieuKienApDung;
+    }
+    
+
+    public Model_Vourcher(String maVoucher, String mota, float giamGia, BigDecimal giamGiaToiDa, int hinhThucGiamGia, Date ngayBatDau, Date ngayKetThuc, String dieuKienApDung, boolean trangThai) {
+        this.maVoucher = maVoucher;
+        this.mota = mota;
+        this.giamGia = giamGia;
+        this.giamGiaToiDa = giamGiaToiDa;
+        this.hinhThucGiamGia = hinhThucGiamGia;
+        this.ngayBatDau = ngayBatDau;
+        this.ngayKetThuc = ngayKetThuc;
+        this.dieuKienApDung = dieuKienApDung;
+        this.trangThai = trangThai;
     }
     
 
@@ -150,7 +154,4 @@ public class Voucher {
     public void setDieuKienApDung(String dieuKienApDung) {
         this.dieuKienApDung = dieuKienApDung;
     }
-    
-    
-    
 }

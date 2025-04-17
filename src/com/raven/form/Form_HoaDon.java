@@ -4,7 +4,10 @@
  */
 package com.raven.form;
 
-
+import com.raven.model.Model_HDCT;
+import com.raven.model.Model_HoaDon;
+import com.raven.repository.Repository_HDCT;
+import com.raven.repository.Repository_HoaDon;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,15 +29,39 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class Form_HoaDon extends javax.swing.JPanel {
 
+    private Repository_HoaDon repo_HD = new Repository_HoaDon();
+    private Repository_HDCT repo_HDCT = new Repository_HDCT();
+    private int i=-1;
+
+    // Hai model riêng biệt cho hai bảng
+    private DefaultTableModel modelHoaDon;
+    private DefaultTableModel modelHDCT;
 
     public Form_HoaDon() {
         initComponents();
+        fillTableHoaDon(repo_HD.getAll());
+        fillTableHDCT(repo_HDCT.getAll());
+    }
+    // Load danh sách hóa đơn
+
+    void fillTableHoaDon(ArrayList<Model_HoaDon> list) {
+        modelHoaDon = (DefaultTableModel) tbl_DSHD.getModel();
+        modelHoaDon.setRowCount(0); // Clear bảng
+        for (Model_HoaDon hd : list) {
+            modelHoaDon.addRow(hd.toDataRow());
+        }
     }
 
-    
-   
+    // Load chi tiết hóa đơn
+    void fillTableHDCT(ArrayList<Model_HDCT> list) {
+        modelHDCT = (DefaultTableModel) tbl_hoadonChiTiet.getModel();
+        modelHDCT.setRowCount(0);
+        for (Model_HDCT ct : list) {
+            modelHDCT.addRow(ct.ToDataRow());
+        }
+    }
+    // Gợi ý thêm (click vào 1 dòng hóa đơn → hiển thị chi tiết):
 
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -121,13 +148,13 @@ public class Form_HoaDon extends javax.swing.JPanel {
 
         tbl_DSHD.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã HD", "Mã KH", "Tên KH", "SĐT", "Id_NV", "Ngày thanh toán", "Tổng tiền BĐ", "Tổng tiền KM", "Mã Voucher", "Tổng tiền sau KM", "Trạng thái"
+                "Mã HD", "Mã KH", "Tên KH", "SĐT", "Ngày thanh toán", "Tổng tiền BĐ", "Tổng tiền KM", "Mã Voucher", "Tổng tiền sau KM", "Trạng thái"
             }
         ));
         tbl_DSHD.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -255,13 +282,13 @@ public class Form_HoaDon extends javax.swing.JPanel {
 
         tbl_hoadonChiTiet.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Mã HDCT", "Mã HD", "Mã Sản Phẩm", "Imei", "Đơn giá", "Số lượng"
+                "Mã HDCT", "Mã HD", "Mã Sản Phẩm", "Đơn giá", "Số lượng"
             }
         ));
         jScrollPane2.setViewportView(tbl_hoadonChiTiet);
@@ -305,49 +332,137 @@ public class Form_HoaDon extends javax.swing.JPanel {
 
     private void txt_searchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_searchActionPerformed
         // TODO add your handling code here:
+        btn_SearchHDActionPerformed(evt);
     }//GEN-LAST:event_txt_searchActionPerformed
 
     private void rdo_tatcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdo_tatcaActionPerformed
         // TODO add your handling code here:
-        
+        fillTableHoaDon(repo_HD.getAll());
     }//GEN-LAST:event_rdo_tatcaActionPerformed
 
     private void rdo_chothanhtoanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdo_chothanhtoanActionPerformed
         // TODO add your handling code here:
-        
+        fillTableHoaDon(repo_HD.loc(false));
     }//GEN-LAST:event_rdo_chothanhtoanActionPerformed
 
     private void rdo_dathanhtoanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rdo_dathanhtoanActionPerformed
         // TODO add your handling code here:
-        
+        fillTableHoaDon(repo_HD.loc(true));
     }//GEN-LAST:event_rdo_dathanhtoanActionPerformed
 
     private void btn_huyHDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_huyHDActionPerformed
         // TODO add your handling code here:
-        
-          
+        if (rdo_chothanhtoan.isSelected()) {
+            i = tbl_DSHD.getSelectedRow();
+            if (i < 0) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần hủy!");
+                return;
+            }
+
+            String maHD = tbl_DSHD.getValueAt(i, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa hóa đơn [" + maHD + "]?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                repo_HD.xoa(maHD);
+                fillTableHoaDon(repo_HD.loc(false)); // Load lại danh sách hóa đơn chờ
+                JOptionPane.showMessageDialog(this, "Xóa thành công!");
+            }
+        }
     }//GEN-LAST:event_btn_huyHDActionPerformed
 
     private void tbl_DSHDMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_DSHDMouseClicked
         // TODO add your handling code here:
-        
+        i = tbl_DSHD.getSelectedRow();
+        if (i < 0) {
+            JOptionPane.showMessageDialog(this, "Chua chon dong");
+            return;
+        } else {
+            String maHDcantim = tbl_DSHD.getValueAt(i, 0).toString();
+            repo_HDCT.timkiemHDCT(maHDcantim);
+            fillTableHDCT(repo_HDCT.timkiemHDCT(maHDcantim));
+        }
+
     }//GEN-LAST:event_tbl_DSHDMouseClicked
 
     private void btn_xuatExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_xuatExcelActionPerformed
 //         Ask the user to confirm if they want to export the file
-         
-                    
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có muốn xuất file không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            String path = "D:\\PRO";
+            JFileChooser jFileChooser = new JFileChooser(path);
+            jFileChooser.showSaveDialog(this);
+            File saveFile = jFileChooser.getSelectedFile();
+
+            if (saveFile != null) {
+                // Ensure file has .xlsx extension
+                if (!saveFile.toString().endsWith(".xlsx")) {
+                    saveFile = new File(saveFile.toString() + ".xlsx");
+                }
+
+                Workbook wb = new XSSFWorkbook();
+                Sheet sheet = wb.createSheet("DanhSachHoaDon");
+
+                // Write column headers
+                Row rowCol = sheet.createRow(0);
+                for (int i = 0; i < tbl_DSHD.getColumnCount(); i++) {
+                    Cell cell = rowCol.createCell(i);
+                    cell.setCellValue(tbl_DSHD.getColumnName(i));
+                }
+
+                // Write table data
+                for (int j = 0; j < tbl_DSHD.getRowCount(); j++) {
+                    Row row = sheet.createRow(j + 1);
+                    for (int k = 0; k < tbl_DSHD.getColumnCount(); k++) {
+                        Cell cell = row.createCell(k);
+                        if (tbl_DSHD.getValueAt(j, k) != null) {
+                            cell.setCellValue(tbl_DSHD.getValueAt(j, k).toString());
+                        }
+                    }
+                }
+
+                // Save the file
+                try (FileOutputStream out = new FileOutputStream(saveFile)) {
+                    wb.write(out);
+                }
+                wb.close();
+
+                // Show success message
+                JOptionPane.showMessageDialog(this, "Lưu file thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+
+                // Open the file after saving successfully
+                EventStream.openFile(saveFile.toPath());
+            }
+        } catch (HeadlessException | IOException e) {
+            // Show error message if there's an issue saving the file
+            JOptionPane.showMessageDialog(this, "Đã có lỗi xảy ra khi lưu file!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
 
     }//GEN-LAST:event_btn_xuatExcelActionPerformed
 
     private void btn_HDCT_ResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_HDCT_ResetActionPerformed
         // TODO add your handling code here:
-       
+        fillTableHDCT(repo_HDCT.getAll());
     }//GEN-LAST:event_btn_HDCT_ResetActionPerformed
 
     private void btn_SearchHDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_SearchHDActionPerformed
         // TODO add your handling code here:
-        
+        String maHD = txt_search.getText().trim();
+        if (maHD.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập mã hóa đơn!");
+            return;
+        }
+        ArrayList<Model_HoaDon> ds = repo_HD.timkiemHD(maHD);
+        if (ds.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn nào!");
+        } else {
+            fillTableHoaDon(ds);
+            JOptionPane.showMessageDialog(this, "Đã tìm thấy hóa đơn!");
+        }
     }//GEN-LAST:event_btn_SearchHDActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -4,8 +4,13 @@
  */
 package com.raven.form;
 
+import com.raven.model.Model_DoanhThu;
+import com.raven.repository.repository_DoanhThu;
 import java.awt.*;
+import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.swing.DefaultComboBoxModel;
 
@@ -27,13 +32,199 @@ import org.jfree.data.category.DefaultCategoryDataset;
  */
 public class Form_BC extends javax.swing.JPanel {
 
+    private repository_DoanhThu rpdt = new repository_DoanhThu();
+    DefaultTableModel model_sanpham_DT;
+
     /**
      * Creates new form Form_SP
      */
-
     public Form_BC() {
         initComponents();
-        
+        showBarChart("2025");
+        showLineChart();// Hiển thị biểu đồ cột
+        cbo_ngayThang.setModel(new DefaultComboBoxModel<>(new String[]{"Năm", "Tháng"}));
+
+        jcalen_Thang.setVisible(false);
+
+        Jcalender_Nam.setVisible(true);
+        click_Cbo_ngayThang1();
+        fillToTable_DT_SP(rpdt.getSOLuongNam(2025, "Tang"));
+        NumberFormat vndFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+
+// Tổng doanh thu năm
+
+        double tongNam = rpdt.getDoanhThuTrongNam(2025);
+        lbl_tongDoanhthu.setText(vndFormat.format(tongNam));
+
+// Doanh thu trong ngày
+        double ngay = rpdt.getDoanhThuTrongNgay(today);
+        lbl_tienTrongNgay.setText(vndFormat.format(ngay));
+
+// Tổng sản phẩm đã bán trong năm
+        int soLuongNam = rpdt.getTongSoLuongBanTrongNam(year);
+        lbl_tongDaban.setText(String.valueOf(soLuongNam));
+
+// Tổng sản phẩm bán trong ngày
+        int spTrongNgay = rpdt.getSoLuongBanTrongNgay(today);
+        lbl_SPbantrongNgay.setText(String.valueOf(spTrongNgay));
+
+    }
+
+    void fillToTable_DT_SP(ArrayList<Model_DoanhThu> ds) {
+        model_sanpham_DT = (DefaultTableModel) tbl_SanPhamBC.getModel();
+        model_sanpham_DT.setRowCount(0);
+        for (Model_DoanhThu d : ds) {
+            model_sanpham_DT.addRow((Object[]) d.todata_SanPham_DT());
+        }
+
+    }
+
+    public void click_Cbo_ngayThang1() {
+        cbo_ngayThang.addActionListener(e -> {
+            String selected = (String) cbo_ngayThang.getSelectedItem();
+            if (selected != null && selected.equals("Tháng")) {
+
+                jcalen_Thang.setVisible(true);
+                Jcalender_Nam.setVisible(true);
+            } else if (selected != null && selected.equals("Năm")) {
+                jcalen_Thang.setVisible(false);
+
+                Jcalender_Nam.setVisible(true);
+            }
+        });
+    }
+
+// Gọi phương thức
+    public void showLineChart() {
+        //create dataset for the graph
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        dataset.setValue(200, "VND", "january");
+        dataset.setValue(150, "VND", "february");
+        dataset.setValue(18, "VND", "march");
+        dataset.setValue(100, "VND", "april");
+        dataset.setValue(80, "VND", "may");
+        dataset.setValue(250, "VND", "june");
+
+        //create chart
+        JFreeChart linechart = ChartFactory.createLineChart("Doanh thu theo tháng", "Tháng", "VND",
+                dataset, PlotOrientation.VERTICAL, false, true, false);
+
+        //create plot object
+        CategoryPlot lineCategoryPlot = linechart.getCategoryPlot();
+        // lineCategoryPlot.setRangeGridlinePaint(Color.BLUE);
+        lineCategoryPlot.setBackgroundPaint(Color.white);
+
+        //create render object to change the moficy the line properties like color
+        LineAndShapeRenderer lineRenderer = (LineAndShapeRenderer) lineCategoryPlot.getRenderer();
+        Color lineChartColor = new Color(204, 0, 51);
+        lineRenderer.setSeriesPaint(0, lineChartColor);
+
+        //create chartPanel to display chart(graph)
+        ChartPanel lineChartPanel = new ChartPanel(linechart);
+        panel_DT_Thang.removeAll();
+        panel_DT_Thang.add(lineChartPanel, BorderLayout.CENTER);
+        panel_DT_Thang.validate();
+    }
+
+    private void showLineChart(int year, int month) {
+        // Tạo dataset cho biểu đồ
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        // Lấy dữ liệu từ cơ sở dữ liệu
+        ArrayList<Model_DoanhThu> ds = rpdt.getDataByDay(year, month);
+
+        // Đảm bảo rằng tất cả các ngày (1-31) đều có dữ liệu
+        for (int day = 1; day <= 31; day++) {
+            // Mặc định số lượng là 0
+            int soLuong = 0;
+
+            // Kiểm tra xem dữ liệu cho ngày này đã có chưa
+            for (Model_DoanhThu data : ds) {
+                int dayFromData = Integer.parseInt(data.getThang()); // Chuyển ngày từ String sang int
+                if (dayFromData == day) {
+                    soLuong = data.getSoLuong(); // Cập nhật nếu có dữ liệu cho ngày này
+                    break; // Nếu tìm thấy thì không cần kiểm tra thêm
+                }
+            }
+
+            dataset.addValue(soLuong, "Số lượng", "Ngày " + day);
+        }
+
+        // Tạo biểu đồ đường
+        JFreeChart lineChart = ChartFactory.createLineChart(
+                "Số lượng sản phẩm bán theo ngày trong tháng " + month + " năm " + year,
+                "Ngày", // Trục X
+                "Số lượng", // Trục Y
+                dataset,
+                PlotOrientation.VERTICAL,
+                false, true, false);
+
+        // Xoay nhãn trục X để tránh chồng lấn
+        CategoryPlot plot = lineChart.getCategoryPlot();
+        CategoryAxis axis = plot.getDomainAxis();
+        axis.setCategoryLabelPositions(CategoryLabelPositions.createUpRotationLabelPositions(45.0f)); // Xoay nhãn 45 độ
+
+        // Hiển thị biểu đồ
+        ChartPanel chartPanel = new ChartPanel(lineChart);
+        panel_topSPBanChay.removeAll();
+        panel_topSPBanChay.setLayout(new BorderLayout());
+        panel_topSPBanChay.add(chartPanel, BorderLayout.CENTER);
+        panel_topSPBanChay.revalidate();
+        panel_topSPBanChay.repaint();
+    }
+
+    private void showBarChart(String nam) {
+        // Lấy dữ liệu từ cơ sở dữ liệu
+        ArrayList<Model_DoanhThu> salesData = rpdt.getAll(nam);
+
+        // Tạo dataset cho biểu đồ
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        // Đảm bảo rằng tất cả các tháng (1-12) đều có dữ liệu
+        for (int month = 1; month <= 12; month++) {
+            // Mặc định số lượng là 0
+            int soLuong = 0;
+
+            // Kiểm tra xem dữ liệu cho tháng này đã có chưa
+            for (Model_DoanhThu dt : salesData) {
+                int monthFromData = Integer.parseInt(dt.getThang()); // Chuyển tháng từ String sang int
+                if (monthFromData == month) {
+                    soLuong = dt.getSoLuong(); // Cập nhật nếu có dữ liệu cho tháng này
+                    break; // Nếu tìm thấy thì không cần kiểm tra thêm
+                }
+            }
+
+            // Thêm dữ liệu vào dataset (Tháng 1-12)
+            dataset.addValue(soLuong, "Số lượng", "Tháng " + month);
+        }
+
+        // Tạo biểu đồ cột
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Số lượng bán của sản phẩm theo tháng trong năm " + nam, // Tiêu đề biểu đồ
+                "Tháng", // Nhãn trục X
+                "Số lượng", // Nhãn trục Y
+                dataset, // Dữ liệu
+                PlotOrientation.VERTICAL, // Hướng biểu đồ
+                false, // Hiển thị chú thích
+                true, // Hiển thị công cụ
+                false // Không tạo URL
+        );
+
+        // Tạo Panel chứa biểu đồ
+        ChartPanel chartPanel = new ChartPanel(barChart);
+
+        // Xóa các thành phần cũ nếu có
+        panel_topSPBanChay.removeAll();
+
+        // Thêm biểu đồ vào panel
+        panel_topSPBanChay.setLayout(new BorderLayout());
+        panel_topSPBanChay.add(chartPanel, BorderLayout.CENTER);
+
+        // Làm mới giao diện
+        panel_topSPBanChay.revalidate();
+        panel_topSPBanChay.repaint();
     }
 
     /**
@@ -76,20 +267,12 @@ public class Form_BC extends javax.swing.JPanel {
         lbl_tongDaban = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         lbl_SPbantrongNgay = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         lbl_tongDoanhthu = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         lbl_tienTrongNgay = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
-        jPanel10 = new javax.swing.JPanel();
-        jLabel17 = new javax.swing.JLabel();
-        cbo_ThangBan = new javax.swing.JComboBox<>();
-        jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
-        cbo_namBan = new javax.swing.JComboBox<>();
-        lbl_NgayBan = new javax.swing.JTextField();
         jPanel11 = new javax.swing.JPanel();
         panel_DT_Thang = new javax.swing.JPanel();
 
@@ -171,18 +354,23 @@ public class Form_BC extends javax.swing.JPanel {
         jLabel2.setText("Thời gian:");
 
         cbo_sapxep.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tăng dần", "Giảm dần", " " }));
+        cbo_sapxep.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbo_sapxepActionPerformed(evt);
+            }
+        });
 
         jLabel3.setText("Sắp xếp:");
 
         tbl_SanPhamBC.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
             },
             new String [] {
-                "Mã SP", "Tên SP", "Đã bán", "Doanh Thu"
+                "Mã SP", "Tên SP", "Đã bán"
             }
         ));
         jScrollPane1.setViewportView(tbl_SanPhamBC);
@@ -283,8 +471,6 @@ public class Form_BC extends javax.swing.JPanel {
         lbl_SPbantrongNgay.setForeground(new java.awt.Color(255, 255, 255));
         lbl_SPbantrongNgay.setText("12 sản phẩm");
 
-        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Computer.png"))); // NOI18N
-
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
@@ -301,9 +487,7 @@ public class Form_BC extends javax.swing.JPanel {
                             .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(43, 43, 43)
-                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel12)
-                            .addComponent(lbl_tongDaban))
+                        .addComponent(lbl_tongDaban)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -311,9 +495,7 @@ public class Form_BC extends javax.swing.JPanel {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel12))
+                .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lbl_tongDaban)
@@ -324,7 +506,7 @@ public class Form_BC extends javax.swing.JPanel {
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(lbl_SPbantrongNgay))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         jPanel8.setBackground(new java.awt.Color(153, 102, 0));
@@ -407,55 +589,6 @@ public class Form_BC extends javax.swing.JPanel {
 
         jPanel6.add(Panel_h_l);
 
-        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Lọc"));
-
-        jLabel17.setText("Ngày");
-
-        cbo_ThangBan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jLabel18.setText("Tháng");
-
-        jLabel19.setText("Năm:");
-
-        cbo_namBan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10.setLayout(jPanel10Layout);
-        jPanel10Layout.setHorizontalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel18)
-                    .addComponent(jLabel19)
-                    .addComponent(jLabel17))
-                .addGap(27, 27, 27)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lbl_NgayBan)
-                    .addComponent(cbo_ThangBan, 0, 144, Short.MAX_VALUE)
-                    .addComponent(cbo_namBan, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel10Layout.setVerticalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
-                .addGap(2, 2, 2)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel17)
-                    .addComponent(lbl_NgayBan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cbo_ThangBan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel18))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel19)
-                    .addComponent(cbo_namBan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(27, Short.MAX_VALUE))
-        );
-
-        jPanel6.add(jPanel10);
-
         jPanel5.add(jPanel6, java.awt.BorderLayout.PAGE_START);
 
         panel_DT_Thang.setPreferredSize(new java.awt.Dimension(528, 500));
@@ -491,15 +624,51 @@ public class Form_BC extends javax.swing.JPanel {
 
         add(jTabbedPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
+void click_Cbo_ngayThang() {
+        cbo_ngayThang.addActionListener(e -> {
+            String selected = (String) cbo_ngayThang.getSelectedItem();
+            if (selected != null && !selected.equals("Tháng")) {
+                jcalen_Thang.setVisible(true); // Ẩn JCalendar khi chọn tháng
+                Jcalender_Nam.setVisible(true); // Ẩn JCalendar khi chọn tháng
+            } else {
+                jcalen_Thang.setVisible(true);
+                Jcalender_Nam.setVisible(false);// Hiện JCalendar khi chọn "Chọn ngày cụ thể"
+            }
+        });
 
+//        // Thêm sự kiện cho JCalendar
+//        calendar.addPropertyChangeListener("calendar", evt -> {
+//            comboBox.setVisible(false); // Ẩn ComboBox khi chọn ngày từ JCalendar
+//        });
+    }
     private void cbo_ngayThangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbo_ngayThangActionPerformed
         // TODO add your handling code here:
 
     }//GEN-LAST:event_cbo_ngayThangActionPerformed
 
     private void btn_LocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_LocActionPerformed
+        String loc = "";
+        if (cbo_sapxep.getSelectedItem().equals("Tăng dần")) {
+            loc = "Tang";
+        } else {
+            loc = "Giam";
+        }
+        int selectedDate = Jcalender_Nam.getYear();
+        int month = jcalen_Thang.getMonth() + 1;
+        if (cbo_ngayThang.getSelectedItem().equals("Tháng")) {
+            showLineChart(selectedDate, month);
+            fillToTable_DT_SP(rpdt.getSOLuongThang(selectedDate, month, loc));
+        } else {
+            showBarChart(String.valueOf(selectedDate));
+            fillToTable_DT_SP(rpdt.getSOLuongNam(selectedDate, loc));
+            // Truyền năm vào phương thức hiển thị biểu đồ
+        }
 
     }//GEN-LAST:event_btn_LocActionPerformed
+
+    private void cbo_sapxepActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbo_sapxepActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbo_sapxepActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -507,18 +676,12 @@ public class Form_BC extends javax.swing.JPanel {
     private javax.swing.JPanel Panel_SPBanChay;
     private javax.swing.JPanel Panel_h_l;
     private javax.swing.JButton btn_Loc;
-    private javax.swing.JComboBox<String> cbo_ThangBan;
-    private javax.swing.JComboBox<String> cbo_namBan;
     private javax.swing.JComboBox<String> cbo_ngayThang;
     private javax.swing.JComboBox<String> cbo_sapxep;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -526,7 +689,6 @@ public class Form_BC extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -542,7 +704,6 @@ public class Form_BC extends javax.swing.JPanel {
     private javax.swing.JLabel lbl_Gio;
     private javax.swing.JLabel lbl_MaNV;
     private javax.swing.JLabel lbl_Ngay;
-    private javax.swing.JTextField lbl_NgayBan;
     private javax.swing.JLabel lbl_SPbantrongNgay;
     private javax.swing.JLabel lbl_tienTrongNgay;
     private javax.swing.JLabel lbl_tongDaban;

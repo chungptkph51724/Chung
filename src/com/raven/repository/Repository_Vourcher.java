@@ -1,25 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.raven.repo;
+package com.raven.repository;
 
-import DbConnect.DBConnect;
-import com.raven.model.Voucher;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import com.raven.model.Model_Vourcher;
 
-/**
- *
- * @author ADMIN
- */
-public class VoucherRepo {
+public class Repository_Vourcher {
+    public static ArrayList<Model_Vourcher> list = new ArrayList<>();
 
-    public static ArrayList<Voucher> list = new ArrayList<>();
-
-    public ArrayList<Voucher> getAll() {
+    public ArrayList<Model_Vourcher> getAll() {
         String sql = """
                SELECT [id]
                         ,[maVoucher]
@@ -31,14 +20,14 @@ public class VoucherRepo {
                         ,[ngayKT]
                         ,[dieuKienApDung]
                     FROM [dbo].[Voucher]
-                     WHERE [is_deleted] = 1
+                     WHERE [trangThai] = 1
                 """;
         try {
-            Connection conn = DBConnect.getConnection();
+            Connection conn = DBConnect.DBConnect.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Voucher vc = new Voucher();
+                Model_Vourcher vc = new Model_Vourcher();
                 vc.setId(rs.getInt(1));
                 vc.setMaVoucher(rs.getString(2));
                 vc.setMota(rs.getString(3));
@@ -56,7 +45,7 @@ public class VoucherRepo {
         return list;
     }
 
-    public boolean AddVoucher(Voucher vc) {
+    public boolean AddVoucher(Model_Vourcher vc) {
         String sql = """
                      INSERT INTO [dbo].[Voucher]
                                 ([maVoucher]
@@ -70,7 +59,7 @@ public class VoucherRepo {
                           VALUES(?,?,?,?,?,?,?,?)
                      """;
 
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, vc.getMaVoucher());
             ps.setString(2, vc.getMota());
@@ -87,7 +76,7 @@ public class VoucherRepo {
         }
     }
 
-    public boolean UpdateVoucher(Voucher vc) {
+    public boolean UpdateVoucher(Model_Vourcher vc) {
         String sql = """
                      UPDATE [dbo].[Voucher]
                              SET [maVoucher] = ?
@@ -101,7 +90,7 @@ public class VoucherRepo {
                            WHERE [id]=?
                      """;
 
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, vc.getMaVoucher());
             ps.setString(2, vc.getMota());
@@ -118,15 +107,15 @@ public class VoucherRepo {
             return false;
         }
     }
-      public boolean DeleteVoucher(Voucher vc) {
+      public boolean DeleteVoucher(Model_Vourcher vc) {
         String sql = """
                      UPDATE [dbo].[Voucher]
                              SET 
-                                [is_deleted]=0
+                                [trangThai]=0
                            WHERE [id]=?
                      """;
 
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, vc.getId());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -136,10 +125,10 @@ public class VoucherRepo {
     }
 
     public static void main(String[] args) {
-        VoucherRepo repo = new VoucherRepo();
+        Repository_Vourcher repo = new Repository_Vourcher();
         list = repo.getAll();
 
-        for (Voucher gv : list) {
+        for (Model_Vourcher gv : list) {
             System.out.println(gv.getId() + " " + gv.getMaVoucher() + " " + gv.getMota());
         }
     }
