@@ -142,7 +142,7 @@ public class Model_SPChiTiet {
         this.trangThai = trangThai;
     }
     public Object[] toDataRow() {
-        return new Object[]{id,maSPChiTiet, tenSP, tenMau, tenKichThuoc,tenLoaiSP, soLuongTon, giaBan,trangThai ?"con":"het"};
+        return new Object[]{id,maSPChiTiet, tenSP, tenMau, tenKichThuoc,tenLoaiSP, soLuongTon, giaBan,trangThai ?"Còn hàng":"Hết hàng"};
     }
 
 }

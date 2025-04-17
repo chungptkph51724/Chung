@@ -132,43 +132,41 @@ public class Repository_SPChiTiet {
                          "    soLuongTon = ?, " +
                          "    giaBan = ?, " +
                          "    trangThai = ? " +
-                         "WHERE maSPChiTiet = ?";
+                         "WHERE id = ?";  // đúng!
 
     Connection conn = null;
     PreparedStatement pr = null;
     ResultSet rs = null;
-    int productId = -1;  // Default invalid value
+    int productId = -1;
 
     try {
         conn = DBConnect.DBConnect.getConnection();
         
-        // Kiểm tra xem sản phẩm và loại sản phẩm có tồn tại không
+        // Lấy id_sanPham
         pr = conn.prepareStatement(productIdQuery);
         pr.setString(1, sp.getTenSP());
         pr.setString(2, sp.getTenLoaiSP());
         rs = pr.executeQuery();
         
         if (rs.next()) {
-            // Nếu có, lấy ID sản phẩm
             productId = rs.getInt("id");
-        }
-
-        // Nếu không tìm thấy sản phẩm, ta có thể gán một giá trị mặc định hoặc xử lý lỗi
-        if (productId == -1) {
+        } else {
             JOptionPane.showMessageDialog(null, "Không tìm thấy sản phẩm hoặc loại sản phẩm!");
             return false;
         }
+        rs.close();
+        pr.close();
 
-        // Cập nhật thông tin sản phẩm chi tiết
+        // Tiến hành cập nhật
         pr = conn.prepareStatement(updateQuery);
         pr.setString(1, sp.getMaSPChiTiet());
-        pr.setInt(2, productId);  // Gán ID sản phẩm tìm được
+        pr.setInt(2, productId);
         pr.setString(3, sp.getTenMau());
         pr.setString(4, sp.getTenKichThuoc());
         pr.setInt(5, sp.getSoLuongTon());
         pr.setDouble(6, sp.getGiaBan());
         pr.setBoolean(7, sp.isTrangThai());
-        pr.setString(8, sp.getMaSPChiTiet());
+        pr.setInt(8, sp.getId());  // <-- Dùng id SPChiTiet
 
         return pr.executeUpdate() > 0;
 
@@ -185,6 +183,7 @@ public class Repository_SPChiTiet {
         }
     }
 }
+
 
 
 
