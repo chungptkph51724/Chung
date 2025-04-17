@@ -41,6 +41,7 @@ public class Form_SP extends javax.swing.JPanel {
         loadLoaiSP();
         fillToTable(rp.gettAll_Sp());
         fillToTable1(rp_spct.getData());
+
     }
 
     void fillToTable(ArrayList<Model_SanPham> ds) {
@@ -258,6 +259,7 @@ public class Form_SP extends javax.swing.JPanel {
         tbl_CTSP = new javax.swing.JTable();
         btn_update = new javax.swing.JButton();
         btn_delete = new javax.swing.JButton();
+        btn_lammoi = new javax.swing.JButton();
         cbo_loc = new javax.swing.JComboBox<>();
         jLabel12 = new javax.swing.JLabel();
         btn_loc = new javax.swing.JButton();
@@ -671,18 +673,30 @@ public class Form_SP extends javax.swing.JPanel {
             }
         });
 
+        btn_lammoi.setBackground(new java.awt.Color(102, 255, 255));
+        btn_lammoi.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btn_lammoi.setText("MỚI");
+        btn_lammoi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_lammoiActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btn_update)
-                .addGap(18, 18, 18)
-                .addComponent(btn_delete)
-                .addGap(182, 182, 182))
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1063, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btn_lammoi)
+                        .addGap(18, 18, 18)
+                        .addComponent(btn_update)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btn_delete)
+                        .addGap(99, 99, 99))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1063, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 89, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
@@ -693,7 +707,8 @@ public class Form_SP extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_update)
-                    .addComponent(btn_delete))
+                    .addComponent(btn_delete)
+                    .addComponent(btn_lammoi))
                 .addContainerGap())
         );
 
@@ -938,13 +953,29 @@ public class Form_SP extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Không tìm thấy sản phẩm thuộc loại: " + tenLoaiSP);
         }
     }//GEN-LAST:event_btn_locActionPerformed
-    
+
+    private void btn_lammoiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_lammoiActionPerformed
+        // TODO add your handling code here:
+        txt_masp.setText("");
+        txt_tensp.setText("");
+        txt_mau.setText("");
+        txt_loaisp.setText("");
+        txt_giasp.setText("");
+        txt_soluongton.setText("");
+
+        cbo_kichthuoc.setSelectedIndex(0);
+
+        rdo_con.setSelected(true);
+
+        tbl_CTSP.clearSelection();
+    }//GEN-LAST:event_btn_lammoiActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Panel_duoi;
     private javax.swing.JButton btn_TimKiem;
     private javax.swing.JButton btn_delete;
+    private javax.swing.JButton btn_lammoi;
     private javax.swing.JButton btn_loc;
     private javax.swing.JButton btn_themSP;
     private javax.swing.JButton btn_update;
