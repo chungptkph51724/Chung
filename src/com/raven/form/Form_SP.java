@@ -107,7 +107,7 @@ public class Form_SP extends javax.swing.JPanel {
     }
 
     private boolean checkEmpty() {
-        // Kiểm tra các trường thông tin nhập vào
+        // Kiểm tra rỗng
         if (txt_masp.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập mã sản phẩm");
             return false;
@@ -124,21 +124,74 @@ public class Form_SP extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập số lượng tồn");
             return false;
         }
+
+        // Kiểm tra định dạng số và giá trị
+        try {
+            double gia = Double.parseDouble(txt_giasp.getText().trim());
+            if (gia <= 0) {
+                JOptionPane.showMessageDialog(this, "Giá sản phẩm phải lớn hơn 0");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Giá sản phẩm phải là số");
+            return false;
+        }
+
+        try {
+            int soLuong = Integer.parseInt(txt_soluongton.getText().trim());
+            if (soLuong < 0) {
+                JOptionPane.showMessageDialog(this, "Số lượng tồn phải >= 0");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Số lượng tồn phải là số nguyên");
+            return false;
+        }
+
         return true;
     }
 
     private Model_SPChiTiet getForm() {
-        // Trả về một đối tượng Model_SPChiTiet từ dữ liệu trên giao diện
-        return new Model_SPChiTiet(
-                txt_masp.getText().trim(),
-                txt_tensp.getText().trim(),
-                txt_mau.getText().trim(),
-                (String) cbo_kichthuoc.getSelectedItem(), // Kích thước
-                txt_loaisp.getText().trim(),
-                (int) Double.parseDouble(txt_giasp.getText().trim()),
-                Integer.parseInt(txt_soluongton.getText().trim()),
-                rdo_con.isSelected() // Trạng thái (Còn hay hết)
-        );
+        String ma = txt_masp.getText().trim();
+        String ten = txt_tensp.getText().trim();
+        String mau = txt_mau.getText().trim();
+        String kichThuoc = (String) cbo_kichthuoc.getSelectedItem();
+        String loaiSP = txt_loaisp.getText().trim();
+
+        // Kiểm tra rỗng
+        if (ma.isEmpty() || ten.isEmpty() || mau.isEmpty() || loaiSP.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
+            return null;
+        }
+
+        double gia;
+        int soLuong;
+
+        try {
+            gia = Double.parseDouble(txt_giasp.getText().trim());
+            if (gia <= 0) {
+                JOptionPane.showMessageDialog(this, "Giá bán phải > 0");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Giá bán không hợp lệ");
+            return null;
+        }
+
+        try {
+            soLuong = Integer.parseInt(txt_soluongton.getText().trim());
+            if (soLuong <= 0) {
+                JOptionPane.showMessageDialog(this, "Số lượng tồn phải > 0");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Số lượng tồn không hợp lệ");
+            return null;
+        }
+
+        boolean trangThai = rdo_con.isSelected();
+
+        return new Model_SPChiTiet(ma, ten, mau, kichThuoc, loaiSP, (int) gia, soLuong, trangThai);
     }
 
     public void ngaygio() {
@@ -590,7 +643,7 @@ public class Form_SP extends javax.swing.JPanel {
                 {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "ID", "Ma san pham", "Ten san pham", "Mau sac", "Kich thuoc", ";Loai san pham", "So luong ton", "Gia ban", "Trang thai"
+                "ID", "Ma san pham", "Ten san pham", "Mau sac", "Kich thuoc", "Loai san pham", "Gia ban", "So luong ton", "Trang thai"
             }
         ));
         tbl_CTSP.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -765,37 +818,18 @@ public class Form_SP extends javax.swing.JPanel {
 
     private void btn_updateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_updateActionPerformed
         // TODO add your handling code here:
-        String maSPChiTiet = txt_masp.getText();
-        String tenSP = txt_tensp.getText();
-        String tenMau = txt_mau.getText();
-        String tenKichThuoc = cbo_kichthuoc.getSelectedItem().toString();
-        String tenloaiSP = txt_loaisp.getText();
-        int soLuongTon = Integer.parseInt(txt_soluongton.getText());
-        double giaBan = Double.parseDouble(txt_giasp.getText());
-        boolean trangThai = rdo_con.isSelected();
-
-        // Tạo đối tượng Model_SPChiTiet từ dữ liệu lấy được
-        Model_SPChiTiet sp = new Model_SPChiTiet();
-        sp.setMaSPChiTiet(maSPChiTiet);
-        sp.setTenSP(tenSP);
-        sp.setTenMau(tenMau);
-        sp.setTenKichThuoc(tenKichThuoc);
-        sp.setTenLoaiSP(tenloaiSP);
-        sp.setSoLuongTon(soLuongTon);
-        sp.setGiaBan(giaBan);
-        sp.setTrangThai(trangThai);
-
-        // Gọi phương thức update của Repository_SPChiTiet để cập nhật
-        Repository_SPChiTiet repo = new Repository_SPChiTiet();
-        boolean result = repo.update(sp);
-
-        // Thông báo kết quả
-        if (result) {
-            JOptionPane.showMessageDialog(null, "Cập nhật thành công!");
-            fillToTable1(rp_spct.getData()); // Cập nhật lại bảng sau khi sửa
-        } else {
-            JOptionPane.showMessageDialog(null, "Cập nhật thất bại!");
+        Model_SPChiTiet sp = getForm();
+        if (sp == null) {
+            return;
         }
+
+        if (rp_spct.update(sp)) {
+            JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+            fillToTable1(rp_spct.getData());
+        } else {
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
+        }
+
 
     }//GEN-LAST:event_btn_updateActionPerformed
 
@@ -843,40 +877,23 @@ public class Form_SP extends javax.swing.JPanel {
     private void btn_themSPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_themSPActionPerformed
         // TODO add your handling code here:
 
-        String maSPChiTiet = txt_masp.getText();
-        String tenSP = txt_tensp.getText();
-        String tenMau = txt_mau.getText();
-        String tenKichThuoc = cbo_kichthuoc.getSelectedItem().toString();
-        String tenloaiSP = txt_loaisp.getText();
-        int soLuongTon = Integer.parseInt(txt_soluongton.getText());
-        double giaBan = Double.parseDouble(txt_giasp.getText());
-        boolean trangThai = rdo_con.isSelected();
+        Model_SPChiTiet sp = getForm();
+        if (sp == null) {
+            return; // Nếu dữ liệu không hợp lệ → stop luôn
+        }
 
-        // Tạo đối tượng Model_SPChiTiet từ dữ liệu lấy được
-        Model_SPChiTiet sp = new Model_SPChiTiet();
-        sp.setMaSPChiTiet(maSPChiTiet);
-        sp.setTenSP(tenSP);
-        sp.setTenMau(tenMau);
-        sp.setTenKichThuoc(tenKichThuoc);
-        sp.setTenLoaiSP(tenloaiSP);
-        sp.setSoLuongTon(soLuongTon);
-        sp.setGiaBan(giaBan);
-        sp.setTrangThai(trangThai);
-
-        // Gọi phương thức save của Repository_SPChiTiet để thêm mới
-        Repository_SPChiTiet repo = new Repository_SPChiTiet();
         try {
-            boolean result = repo.save(sp);
-            // Thông báo kết quả
+            boolean result = new Repository_SPChiTiet().save(sp);
             if (result) {
-                JOptionPane.showMessageDialog(null, "Thêm mới thành công!");
-                fillToTable1(rp_spct.getData()); // Cập nhật lại bảng sau khi thêm
+                JOptionPane.showMessageDialog(this, "Thêm mới thành công!");
+                fillToTable1(rp_spct.getData());
             } else {
-                JOptionPane.showMessageDialog(null, "Thêm mới thất bại!");
+                JOptionPane.showMessageDialog(this, "Thêm mới thất bại!");
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Lỗi khi thêm mới: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Lỗi khi thêm: " + ex.getMessage());
         }
+
     }//GEN-LAST:event_btn_themSPActionPerformed
 
     private void btn_deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteActionPerformed
@@ -921,30 +938,7 @@ public class Form_SP extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Không tìm thấy sản phẩm thuộc loại: " + tenLoaiSP);
         }
     }//GEN-LAST:event_btn_locActionPerformed
-    private void updateTableData() {
-        Repository_SPChiTiet repo = new Repository_SPChiTiet();
-        ArrayList<Model_SPChiTiet> list = repo.getData();  // Hoặc phương thức lấy dữ liệu từ DB
-
-        // Làm mới bảng
-        DefaultTableModel tableModel = (DefaultTableModel) tbl_CTSP.getModel();
-        tableModel.setRowCount(0);  // Xóa tất cả các dòng cũ
-
-        // Thêm dữ liệu mới vào bảng
-        for (Model_SPChiTiet sp : list) {
-            Object[] row = new Object[]{
-                sp.getId(),
-                sp.getMaSPChiTiet(),
-                sp.getTenSP(),
-                sp.getTenLoaiSP(),
-                sp.getTenMau(),
-                sp.getTenKichThuoc(),
-                sp.getSoLuongTon(),
-                sp.getGiaBan(),
-                sp.isTrangThai() ? "Còn hàng" : "Hết hàng"
-            };
-            tableModel.addRow(row);
-        }
-    }
+    
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

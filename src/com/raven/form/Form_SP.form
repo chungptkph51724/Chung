@@ -601,9 +601,9 @@
                                 <Column editable="true" title="Ten san pham" type="java.lang.Object"/>
                                 <Column editable="true" title="Mau sac" type="java.lang.Object"/>
                                 <Column editable="true" title="Kich thuoc" type="java.lang.Object"/>
-                                <Column editable="true" title=";Loai san pham" type="java.lang.Object"/>
-                                <Column editable="true" title="So luong ton" type="java.lang.Object"/>
+                                <Column editable="true" title="Loai san pham" type="java.lang.Object"/>
                                 <Column editable="true" title="Gia ban" type="java.lang.Object"/>
+                                <Column editable="true" title="So luong ton" type="java.lang.Object"/>
                                 <Column editable="true" title="Trang thai" type="java.lang.Object"/>
                               </Table>
                             </Property>
