@@ -101,8 +101,9 @@ public class Form_SP extends javax.swing.JPanel {
         Model_SPChiTiet spct = rp_spct.getData().get(index);
         txt_masp.setText(spct.getMaSPChiTiet());
         txt_tensp.setText(spct.getTenSP());
-        txt_giasp.setText(String.valueOf(spct.getGiaBan()));
+        
         txt_soluongton.setText(String.valueOf(spct.getSoLuongTon()));
+        txt_giasp.setText(String.valueOf(spct.getGiaBan()));
         cbo_loai.setSelectedItem(spct.getTenLoaiSP());
         cbo_mau.setSelectedItem(spct.getTenMau());
         cbo_kichthuoc.setSelectedItem(spct.getTenKichThuoc());
@@ -164,12 +165,13 @@ public class Form_SP extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên sản phẩm");
             return false;
         }
-        if (txt_giasp.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập giá sản phẩm");
-            return false;
-        }
+        
         if (txt_soluongton.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập số lượng tồn");
+            return false;
+        }
+        if (txt_giasp.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập giá sản phẩm");
             return false;
         }
 
@@ -242,28 +244,20 @@ public class Form_SP extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(this, "Vui lòng nhập tên sản phẩm");
         return null;
     }
-    if (txt_giasp.getText().trim().isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Vui lòng nhập giá sản phẩm");
-        return null;
-    }
+    
     if (txt_soluongton.getText().trim().isEmpty()) {
         JOptionPane.showMessageDialog(this, "Vui lòng nhập số lượng tồn");
+        return null;
+    }
+    if (txt_giasp.getText().trim().isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập giá sản phẩm");
         return null;
     }
 
     double gia;
     int soLuong;
 
-    try {
-        gia = Double.parseDouble(txt_giasp.getText().trim());
-        if (gia <= 0) {
-            JOptionPane.showMessageDialog(this, "Giá bán phải > 0");
-            return null;
-        }
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Giá bán không hợp lệ");
-        return null;
-    }
+   
 
     try {
         soLuong = Integer.parseInt(txt_soluongton.getText().trim());
@@ -273,6 +267,16 @@ public class Form_SP extends javax.swing.JPanel {
         }
     } catch (NumberFormatException e) {
         JOptionPane.showMessageDialog(this, "Số lượng tồn không hợp lệ");
+        return null;
+    }
+     try {
+        gia = Double.parseDouble(txt_giasp.getText().trim());
+        if (gia <= 0) {
+            JOptionPane.showMessageDialog(this, "Giá bán phải > 0");
+            return null;
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Giá bán không hợp lệ");
         return null;
     }
 
@@ -312,8 +316,9 @@ public class Form_SP extends javax.swing.JPanel {
     public void clearForm() {
         txt_masp.setText("");
         txt_tensp.setText("");
-        txt_giasp.setText("");
+        
         txt_soluongton.setText("");
+        txt_giasp.setText("");
         cbo_loai.setSelectedIndex(0);
         cbo_mau.setSelectedIndex(0);
         cbo_kichthuoc.setSelectedIndex(0);
@@ -949,7 +954,7 @@ public class Form_SP extends javax.swing.JPanel {
                 {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "ID", "Ma san pham", "Ten san pham", "Mau sac", "Kich thuoc", "Loai san pham", "Gia ban", "So luong ton", "Trang thai"
+                "ID", "Ma san pham", "Ten san pham", "Mau sac", "Kich thuoc", "Loai san pham", "Giá", "Số lượng tồn", "Trang thai"
             }
         ));
         tbl_CTSP.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -1120,8 +1125,8 @@ public class Form_SP extends javax.swing.JPanel {
             cbo_loai.setSelectedItem(tbl_CTSP.getValueAt(i, 5).toString());
             cbo_kichthuoc.setSelectedItem(tbl_CTSP.getValueAt(i, 4).toString());
             cbo_mau.setSelectedItem(tbl_CTSP.getValueAt(i, 3).toString());
-            txt_soluongton.setText(tbl_CTSP.getValueAt(i, 6).toString());
-            txt_giasp.setText(tbl_CTSP.getValueAt(i, 7).toString());
+            txt_soluongton.setText(tbl_CTSP.getValueAt(i, 7).toString());
+            txt_giasp.setText(tbl_CTSP.getValueAt(i, 6).toString());
 
             if ("Còn hàng".equals(tbl_CTSP.getValueAt(i, 8).toString())) {
                 rdo_con.setSelected(true);

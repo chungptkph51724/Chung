@@ -53,8 +53,10 @@ public class Repository_SPChiTiet {
                 sp.setTenLoaiSP(rs.getString("tenLoaiSanPham"));
                 sp.setTenMau(rs.getString("tenMau"));
                 sp.setTenKichThuoc(rs.getString("tenKichThuoc"));
+                 
                 sp.setSoLuongTon(rs.getInt("soLuongTon"));
                 sp.setGiaBan(rs.getDouble("giaBan"));
+               
                 sp.setTrangThai(rs.getBoolean("trangThai"));
                 list.add(sp);
             }
